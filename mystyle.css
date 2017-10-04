@@ -1,0 +1,28 @@
+h1 {
+	color: #1946ba;
+}
+
+p {
+	background-color:#F5F5F5;
+}
+
+#for_quote{
+	border-left: 2px solid lightgrey;
+	margin-left: 20px;
+	max-width: 960px;
+	padding-left: 10px;
+}
+
+#bar{
+	border-color: lightgrey;
+	border-style: solid;
+    border-width: 1px;
+    padding-left: 10px;
+}
+
+button {
+	background-color: #ec0b43;
+	color: white;
+	margin-top: 20px;
+	padding: 10px;
+}
