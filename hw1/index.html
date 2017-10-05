@@ -52,7 +52,7 @@
 		if (typeof q != 'object') return 0;
 		if (selectedAuthor != 'All')
 		{
-			var qq = q.filter((cv, i, a) => cv['quoteAuthor'] == authors[selectedAuthor]);
+			var qq = q.filter((cv, i, a) => cv['quoteAuthor'] == authors[selectedAuthor]).filter((cv, i, a) => a.indexOf(cv) == i);
 		} else var qq = q; 
 		if (qq.length == 1) return;
 		count = 0;
@@ -65,11 +65,10 @@
 	} 
 
 	addQuote = function(){
-		var last_p = document.getElementsByName('quotes')[-1];
-		if (typeof last_p == 'undefined') last_p = document.getElementsByClassName('quotes')[0];
+		var last_p = document.getElementsByTagName('div')[0];
 		if (selectedAuthor != 'All')
 		{
-			var qq = q.filter((cv, i, a) => cv['quoteAuthor'] == authors[selectedAuthor]);
+			var qq = q.filter((cv, i, a) => cv['quoteAuthor'] == authors[selectedAuthor]).filter((cv, i, a) => a.indexOf(cv) == i);
 		} else {
 			var qq = q; 
 		}
@@ -79,7 +78,7 @@
 		var new_p = document.createElement('p');
 		new_p.setAttribute('class',"quotes");
 		new_p.innerHTML = new_text;
-		last_p.parentNode.appendChild(new_p);
+		last_p.appendChild(new_p);
 	}
 
 
