@@ -27,3 +27,7 @@ button {
 	margin-top: 20px;
 	padding: 10px;
 }
+
+button[disabled]{
+	background-color: gray;
+}

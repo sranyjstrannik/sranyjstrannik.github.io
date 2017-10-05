@@ -79,6 +79,7 @@
 		new_p.setAttribute('class',"quotes");
 		new_p.innerHTML = new_text;
 		last_p.appendChild(new_p);
+		document.getElementsByTagName('button')[0].disabled = false;
 	}
 
 
@@ -95,7 +96,9 @@
 		selectedAuthor = author;
 		if (selectedAuthor != 'All'){
 			qts = document.getElementsByClassName('quotes');
-			[].slice.call(qts).map(function(cv, i, a) {if (cv['quoteAuthor'] != selectedAuthor) cv.remove()});	
+			[].slice.call(qts).map(function(cv, i, a) {if (!cv.textContent.endsWith(authors[selectedAuthor])) cv.remove()});	
+			if (document.getElementsByClassName('quotes').length == 0) 
+				document.getElementsByTagName('button')[0].disabled = true;
 		}
 	}
 </script>
