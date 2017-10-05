@@ -3,33 +3,100 @@
 	<head>
 		<meta charset="utf-8">
 		<title>VIS 101 Homework</title>
-		<link rel="stylesheet" type="text/css" href="mystyle.css">
+		<link rel="stylesheet" type="text/css" href="style.css">
 	</head>
 	<body>
 	<h1>First VIS101 Homework</h1>
 	<div id='bar'>
-	<h2>Quote of the Day:</h2>
-	<p id='for_quote'>
+	<h2>Quote of the Day by
+		<select onchange="chooseAuthorQuotes(this.value)">
+			<option value='All'>All authors</option>
+		</select>
+	:
+	</h2>
+	<p class='quotes'>
 		All​ ​successful​ men​ and​​ women​​ are​ ​big​​ dreamers.​ They​ imagine​ what​ their​ ​future could​ ​be,​ ​ideal​ ​ in​ ​ every​ ​ respect,​ ​ and​ ​ then​ ​ they​ ​ work​ ​ every​ ​ day​ ​ toward​ ​ their​ ​ distant vision,​ ​ that​ ​ goal​ ​ or​ ​ purpose.”​ ​ –​ ​ Brian​ ​Tracy 
 	</p>
 	</div>
-	<button type="button"  onclick="clickHandler()">Change Quote of the Day</button>
+	<button type="button"  onclick="changeQuote()">Change Quote of the Day</button>
+	<button type="button"  onclick="addQuote()">Add Quote</button>
+	<button type="button"  onclick="sortQuotes()">Sort quotes</button>
 	</body>
-	<script type="text/javascript">
-	var q= [{"quoteText": "Genius is one percent inspiration and ninety-nine percent perspiration.", "quoteAuthor": "Thomas Edison"},
-	 {"quoteText": "You can observe a lot just by watching.","quoteAuthor": "Yogi Berra"},
-	  {"quoteText": "A house divided against itself cannot stand.","quoteAuthor": "Abraham Lincoln"},
-	   {"quoteText": "Difficulties increase the nearer we get to the goal.","quoteAuthor": "Johann Wolfgang von Goethe"}, 
-	   {"quoteText": "Fate is in your hands and no one elses","quoteAuthor": "Byron Pulsifer"}, 
-	   {"quoteText": "Be the chief but never the lord.","quoteAuthor": "Lao Tzu"}];
-
-	var item = q[Math.floor(Math.random()*q.length)];
-	clickHandler = function(){
-		var item = q[Math.floor(Math.random()*q.length)];
-		fq = document.getElementById('for_qoute');
-		console.log(item['quoteText']);
-		fq.textContent = item['quoteText'].concat(' - ').concat(item['quoteAuthor']);
-
-	} 
-</script>
 </html>
+
+<script type="text/javascript">
+	q = 0;
+	authors = [];
+	selectedAuthor = 'All';
+	
+	getJSON = function(url) {
+    	xhr = new XMLHttpRequest();
+    	xhr.open('GET', url, true);
+    	xhr.responseType = 'json';
+    	xhr.onload = function() {
+      	if (xhr.status === 200) {
+        	q = xhr.response;
+        	authors = q.map(function(cv, i, a){return cv['quoteAuthor']}).sort().filter((cv, i, a) => a.indexOf(cv) == i);
+        	var last_s = document.getElementsByTagName('option')[0];
+			for (i=0; i<authors.length; i++){
+				var new_s = document.createElement('option');
+				new_s.setAttribute('value',i);
+				new_s.innerHTML = authors[i];
+				last_s.parentNode.appendChild(new_s);
+			}}};
+    	xhr.send();};
+
+	getJSON('https://raw.githubusercontent.com/4skinSkywalker/Database-Quotes-JSON/master/quotes.json');
+	
+	changeQuote = function(){
+		if (typeof q != 'object') return 0;
+		if (selectedAuthor != 'All')
+		{
+			var qq = q.filter((cv, i, a) => cv['quoteAuthor'] == authors[selectedAuthor]);
+		} else var qq = q; 
+		if (qq.length == 1) return;
+		count = 0;
+		do {
+		count += 1;
+		item = qq[Math.floor(Math.random()*qq.length)];
+		fq = document.getElementsByClassName('quotes')[0];
+		} while (fq.textContent.startsWith(item['quoteText'].slice(0, 20)) == true & count < 100);
+		fq.textContent = item['quoteText'].concat(' - ').concat(item['quoteAuthor']);
+	} 
+
+	addQuote = function(){
+		var last_p = document.getElementsByName('quotes')[-1];
+		if (typeof last_p == 'undefined') last_p = document.getElementsByClassName('quotes')[0];
+		if (selectedAuthor != 'All')
+		{
+			var qq = q.filter((cv, i, a) => cv['quoteAuthor'] == authors[selectedAuthor]);
+		} else {
+			var qq = q; 
+		}
+		if (qq.length == 1) return;
+		var new_ = qq[Math.floor(Math.random()*qq.length)];
+		var new_text = new_['quoteText'].concat(' - ').concat(new_['quoteAuthor']);
+		var new_p = document.createElement('p');
+		new_p.setAttribute('class',"quotes");
+		new_p.innerHTML = new_text;
+		last_p.parentNode.appendChild(new_p);
+	}
+
+
+	sortQuotes = function(){
+		quotes_elements = document.getElementsByClassName('quotes'); 
+		var ps = [].slice.call(quotes_elements).map(function(cv,i,a){return cv.textContent});
+		var sorted = ps.sort(function(a,b){if (a<b) {return -1} else {return 1}});
+		for (var i=0; i < sorted.length; i++){
+			quotes_elements[i].textContent = sorted[i];
+		}
+	}
+
+	chooseAuthorQuotes = function(author){
+		selectedAuthor = author;
+		if (selectedAuthor != 'All'){
+			qts = document.getElementsByClassName('quotes');
+			[].slice.call(qts).map(function(cv, i, a) {if (cv['quoteAuthor'] != selectedAuthor) cv.remove()});	
+		}
+	}
+</script>
