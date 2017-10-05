@@ -28,6 +28,6 @@ button {
 	padding: 10px;
 }
 
-button[disabled]{
+button[disabled], button:disabled{
 	background-color: gray;
 }
