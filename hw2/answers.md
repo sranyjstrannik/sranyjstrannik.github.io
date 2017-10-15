@@ -13,4 +13,6 @@
 	A: Когда необходимо осознать, как все устроено.
 
 1.2.
-	
+
+	Q: Would you filter other columns from the table the same way? E.g. would you use checkboxes or any other HTML widget?
+	A: 
