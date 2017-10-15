@@ -2,10 +2,10 @@
 
 	* Исходный код table.html содержит скрипт для загрузки содержимого в таблицу и динамического формирования html для отображения этой таблицы. DOM в инспекторе отображает конечный результат этих манипуляций.
 
-	* Why would you use the DOM inspector? 
+Why would you use the DOM inspector? 
 
 	* Чтобы понять, как на данный момент выглядит html-дерево. 
  		
-	* When is the HTML source useful?
+When is the HTML source useful?
 
 	* Когда необходимо осознать, как все устроено.
