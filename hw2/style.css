@@ -1,0 +1,28 @@
+
+
+tbody tr:nth-of-type(even){
+	background-color: lightgray;
+}
+
+table {
+  table-layout: fixed;
+  border-collapse: collapse;
+  border: 1px solid lightgray;
+}
+
+tbody tr:hover { /* mouseover */
+  background-color: yellow;
+}
+
+td, th {
+	padding: 5px;
+	border: 1px solid gray;
+	text-align: right;
+}
+
+th{
+	text-align: center;
+}
+
+td:first-child { text-align: center; }
+td:nth-child(2) {text-align: center; }

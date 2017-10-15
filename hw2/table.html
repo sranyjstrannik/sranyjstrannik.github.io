@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+  <head>
+  <link href="style.css" rel="stylesheet">
+  </head>
+  <body>
+    <script src="http://d3js.org/d3.v4.min.js"></script>
+    <script>
+
+      d3.json("https://raw.githubusercontent.com/avt00/dvcourse/master/countries_2012.json", function(error, data){
+        var columns = ['name', 'continent', 'gdp', 'life_expectancy', 'population', 'year'];
+        columns_names = ['Country', 'Continent', 'GDP, $B', 'Life expectacy, years', 
+        'Population', 'Year']
+        var formatters = [ 
+        d => d, //name
+        d => d, // continent
+        d => Math.round(d/100000000),// gdp
+        d => Math.round(d*100)/100,// life_expectacy
+        d => d.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),// population
+        d => d// year
+        ];
+
+        function replaceAll(str, find, replace) {
+          return str.replace(new RegExp(find, 'g'), replace);
+        };
+
+        var good_data = data.map(function(row) {
+           temp = {};
+           for (c in columns){
+              temp[columns[c]] = formatters[c](row[columns[c]]);
+           }
+           return temp;
+        });
+        var table = d3.select("body").append("table"),
+          thead = table.append("thead")
+                       .attr("class", "thead");
+          tbody = table.append("tbody");
+
+        table.append("caption")
+          .html("<h1>World Countries Ranking</h1>");
+
+        thead.append("tr").selectAll("th")
+          .data(columns_names)
+          .enter()
+          .append("th")
+          .text(function(d) { return d; })
+          .on("click", function(header, i) {
+            tbody.selectAll("tr").sort(function(a, b) {
+              if (new Set([0, 1]).has(i))
+                return d3.descending(a[columns[i]], b[columns[i]]);
+              if (i==4) {
+                aa = +replaceAll(a[columns[i]],',','')
+                bb = +replaceAll(b[columns[i]],',','')
+                return d3.descending(aa, bb);
+              }
+              return d3.descending(a[columns[i]], b[columns[i]]);
+            });
+          });
+
+        var rows = tbody.selectAll("tr.row")
+          .data(good_data)
+          .enter()
+          .append("tr")
+          .attr("class", "row");
+
+        var cells = rows.selectAll("td")
+          .data(function(row) {
+              return d3.range(Object.keys(row).length).map(function(column, i) {
+                  return row[Object.keys(row)[i]];
+              });
+          })
+          .enter()
+          .append("td")
+          .text(function(d) { return d; });
+
+      });
+
+
+    </script> 
+  </body>
+</html>
