@@ -1,8 +1,10 @@
 
 
-tbody tr:nth-of-type(even){
-	background-color: lightgray;
+tbody tr .gray{
+	background-color:gray;
+	display: 
 }
+
 
 table {
   table-layout: fixed;
@@ -20,8 +22,14 @@ td, th {
 	text-align: right;
 }
 
-th{
+th {
 	text-align: center;
+}
+
+caption{
+	text-align: center;
+	font-size: 16px;
+	font-weight: bold;
 }
 
 td:first-child { text-align: center; }
