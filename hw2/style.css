@@ -1,10 +1,8 @@
 
 
-tbody tr .gray{
+tbody tr[show=gray]{
 	background-color:gray;
-	display: 
 }
-
 
 table {
   table-layout: fixed;
