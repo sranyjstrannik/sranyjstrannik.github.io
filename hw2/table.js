@@ -9,6 +9,24 @@ d3.json("https://raw.githubusercontent.com/avt00/dvcourse/master/countries_1995_
     var colNames = ['Country', 'Continent', 'GDP, $B', 'Life expectacy, years', 
         'Population', 'Year'];
 
+    // due to show sorting order
+    var realColNames = {'Country' : 'Country', 
+        'Continent' : 'Continent',
+        'GDP, $B' : 'GDP, $B',
+        'Life expectacy, years' : 'Life expectacy, years',
+        'Year' : 'Year',
+        'Population' : 'Population'
+    };
+
+    var canonicalColNames = colNames; 
+    
+    d3.selectAll("input").on("change",update);
+    d3.select('.range').on("change", update);
+    d3.selectAll(".clickable").on("click", (e, i) => update(i));
+
+
+    var sortOrder = 1;
+    var lastIndex = -1;
 
     var tmp_data = [];
     
@@ -24,26 +42,88 @@ d3.json("https://raw.githubusercontent.com/avt00/dvcourse/master/countries_1995_
             }
             tmp_data.push(obj);
         }
-    }
-    
-    data = tmp_data;
+    };
 
-    // append the header row
-    thead.append('tr')
+    
+
+    function update(index = -1)
+    {
+        
+        data = tmp_data;
+        d3.select("tbody").remove();
+        d3.select("thead").remove();
+        var thead = table.append('thead');
+        var tbody = table.append('tbody');
+
+        var year = d3.select('.range').node().value;
+
+
+        var filteredContinents = [];
+        d3.selectAll("input").each(function(d){
+          cb = d3.select(this);
+          if(cb.property("checked")){
+            filteredContinents.push(cb.property("value"));
+          }
+        }); 
+
+        // delete all undesirable
+        data = data.filter(function(d, i) {return filteredContinents.includes(d['Continent']) && d['Year'] == year });
+        
+        
+        // agg if there is that need    
+        if (filteredContinents.includes("Agg")){
+            aggData = [];
+            for (i = 0; i < filteredContinents.length - 1; i++) aggData.push({
+                'Country' : filteredContinents[i],
+                'Continent' : filteredContinents[i],
+                'GDP, $B' : d3.sum(data.filter(function(d, j) { return d["Continent"] == filteredContinents[i]})
+                    .map(function (d, j) {return d['GDP, $B']})),
+                'Life expectacy, years' : d3.mean(data.filter(function(d, j) { return d["Continent"] == filteredContinents[i]})
+                    .map(function (d, j) {return d['Life expectacy, years']})),
+                'Population' : d3.sum(data.filter(function(d, j) { return d["Continent"] == filteredContinents[i]})
+                    .map(function (d, j) {return d['Population']})),
+                'Year' : year
+            });
+            data = aggData;    
+        };
+
+        // sort
+        if (index >= 0){
+            if (lastIndex == index) sortOrder = -sortOrder
+            else sortOrder = 1; 
+            data.sort(function(a, b) {
+                return (index >= 2 ? 
+                    Math.sign(sortOrder * (parseFloat(a[colNames[index]]) - parseFloat(b[colNames[index]]))) :
+                    sortOrder * (a[colNames[index]] > b[colNames[index]]) );
+            });
+            if (lastIndex >= 0)
+                realColNames[colNames[lastIndex]] = colNames[lastIndex];
+            lastIndex = index;
+            realColNames[colNames[index]] += sortOrder > 0 ? '&uarr;' : '&darr;';
+        };
+
+
+        // append the header row
+        thead.append('tr')
           .selectAll('th')
           .data(colNames).enter()
           .append('th')
-          .text(function (colNames) { return colNames; })
+          .html(function (colNames) { return realColNames[colNames]; })
           .attr("class", "clickable");
 
 
+        d3.selectAll(".clickable").on("click", (e, i) => update(i));
 
-    // create a row for each object in the data
-    var rows = tbody.selectAll('tr')
+
+
+        // create a row for each object in the data
+         var rows = tbody.selectAll('tr')
           .data(data)
           .enter()
-          .append('tr');
-  
+          .append('tr')
+          .attr('gray', function (d, i) {return i % 2 == 0});
+        
+
 
         // create a cell in each row for each column
         var cells = rows.selectAll('td')
@@ -54,48 +134,9 @@ d3.json("https://raw.githubusercontent.com/avt00/dvcourse/master/countries_1995_
           })
           .enter()
           .append('td')
-            .text(function (d) { return d.value; });
-  
-
-    d3.selectAll("input").on("change",update);
-    d3.select('.range').on("change", update);
-    d3.selectAll(".clickable").on("click", (e, i) => sorting(i));
-
-
-
-    function sorting(index){
-        console.log("need some sort");
+            .text(function (d, i) {return i >= 2 && i < 5 ? d3.format(",.1f")(d.value) : d.value});
+            
     };
-    
-
-    function update()
-    {
-
-        var year = d3.select('.range').node().value;
-
-        var filteredContinents = [];
-        d3.selectAll("input").each(function(d){
-          cb = d3.select(this);
-          if(cb.property("checked")){
-            filteredContinents.push(cb.property("value"));
-          }
-        }); 
-
-        //hide undesirable
-        var count = 0;
-
-        tbody.selectAll('tr').each(function (d, i){
-            if (!filteredContinents.includes(d3.select(this).select('td:nth-child(2)').html()) || 
-                d3.select(this).select("td:nth-child(6)").html() != year) d3.select(this).style("display", "none").attr("show", "false")
-            else {
-             count += 1;
-             if (count % 2) d3.select(this).style("display", "table-row").attr("show","gray")
-             else d3.select(this).style("display", "table-row").attr("show","true");
-         }
-
-        });
-    };
-
 
   
     update();

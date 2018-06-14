@@ -1,6 +1,6 @@
 
 
-tbody tr[show=gray]{
+tbody tr[gray=true]{
 	background-color:gray;
 }
 
