@@ -1,7 +1,3 @@
-document.addEventListener('DOMContentLoaded',function() {
-    document.querySelector('select[#id = dataset]').onchange=chooseData;
-},false);
-
 class BarChart {
 
     /**
@@ -22,6 +18,7 @@ class BarChart {
     updateBarChart(selectedDimension) {
 
 
+        console.log("UpdateBarChart:", selectedDimension);
 
         // ******* TODO: PART I *******
 
@@ -29,21 +26,78 @@ class BarChart {
         // Create the x and y scales; make
         // sure to leave room for the axes
 
-        var width = 640;
-        var height = 480;
+        var svg = d3.select("#barChart");
 
-        var xScale = d3.scaleLinear().range([10, width]);
-        var yScale = d3.scaleBand().rangeRound([0, height], .8, 0);
+        var margin = { top: 20, right: 20, bottom: 40, left: 80 };
+        var width = parseInt(svg.attr("width")) - margin.left - margin.right;
+        var height = parseInt(svg.attr("height")) - margin.top - margin.bottom;
+        var max_data = d3.max(this.allData.map(function(d) {return d[selectedDimension]}));
+
+        console.log("max_data", max_data); 
+
+        var xScale = d3.scaleBand().rangeRound([0, width]);
+        var yScale = d3.scaleLinear().rangeRound([0, max_data]);
+
+        xScale.domain(this.allData.sort(function(a, b) {
+            return d3.ascending(a['year'], b['year'])
+            }).map(function (d) { return d['year']; }));
+
+        console.log(xScale.domain());
+
+        yScale.domain([0, max_data]);
 
         // Create colorScale
 
-        var colorScale  = d3.scaleSequential(d3.interpolateBlues).domain([0, 10000]);
+        var colorScale  = d3.scaleLinear()
+            .domain([0, max_data])
+            .interpolate(d3.interpolateBlues)
+            .range("lightblue", "blue");
 
         // Create the axes (hint: use #xAxis and #yAxis)
 
+        svg.select("#xAxis")
+            .attr("transform", "translate(" + height + "," + width + ")")
+            .call(d3.axisBottom(xScale))
+            .selectAll('text')
+            .attr("class", "axis axis--x")
+            .attr("transform", "rotate(-90)")
+            .style("text-anchor", "end")
+            .attr('dy', -1);
+
+        svg.select("#yAxis")
+            .attr("transform", "translate(" + margin.left + ", 0)")
+            .attr("class", "axis axis--y")
+            .transition()
+            .ease(d3.easeSin)
+            .duration(300)
+            .call(d3.axisLeft(yScale));
+
+          
         // Create the bars (hint: use #bars)
 
+        var g = svg.select("#bars").attr("transform", "translate(" + margin.left + ", 0)"); 
 
+        var bars = g.selectAll(".bar").data(this.allData);
+
+        console.log("here we go");
+
+        bars.transition()
+            .duration(1000)
+            .attr("height", d =>  max_data - yScale(d[selectedDimension]))
+            .attr("y", d => yScale(d[selectedDimension]))
+            .attr("fill", d => 'blue');
+            //.attr("fill", d => colorScale(d[selectedDimension]));
+
+
+        bars.enter()
+            .append("rect")
+            .attr("class", "bar")
+            //.attr("fill", d => colorScale(d[selectedDimension]))
+            .attr("x", d => xScale(d['year']))
+            .attr("width", xScale.bandwidth())
+            .attr("height", d => max_data - yScale(d[selectedDimension]))
+            .attr("fill", d => 'blue')
+            .attr("y", d => yScale(d[selectedDimension]));
 
 
         // ******* TODO: PART II *******
@@ -67,7 +121,7 @@ class BarChart {
         // ******* TODO: PART I *******
         //Changed the selected data when a user selects a different
         // menu item from the drop down.
-        console.log(select.options[select.selectedIndex]);
+        this.updateBarChart(select.options[select.selectedIndex].value);
 
     }
 }
