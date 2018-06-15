@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+  <body>
+  
+  
+   <link href="style.css" type="text/css" rel="stylesheet">
+  
+  
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://d3js.org/d3-selection-multi.v0.4.min.js"></script>
+    <script src="barchart.js"> </script>
+     
+     
+     
+    <label>Time: 1995</label>
+    <input type="range" min="1995" max="2012" step="1" class="range"> 2012
+    <br>
+    <label>Encode bars by:</label>
+     <input type="radio" name='encoded' value="GDP" checked> GDP
+     <input type="radio" name='encoded' value="Population"> Population
+    <br>
+    <label>Filter by:</label>
+     <input type="checkbox" value="Americas" checked> Americas
+     <input type="checkbox" value="Africa" checked> Africa
+     <input type="checkbox" value="Asia" checked> Asia
+     <input type="checkbox" value="Europe" checked> Europe
+     <input type="checkbox" value="Oceania" checked> Oceania
+    <br>
+    <label>Aggregate by:</label>
+     <input type="radio" name='aggregated' value="Continent"> Continent
+     <input type="radio" name='aggregated' value="Country" checked> Country
+    <br>
+    <label>Sort by:</label>
+     <input type="radio" name='sorted' value="Name" checked> Name
+     <input type="radio" name='sorted' value="Population"> Population
+     <input type="radio" name='sorted' value="GDP"> GDP
+    <br>
+
+    <div class="chart">
+    </div>
+  </body>
+</html>
