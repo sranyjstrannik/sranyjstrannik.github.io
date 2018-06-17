@@ -54,11 +54,14 @@ class Map {
 
         // Add a marker for gold/silver medalists
 
-        var arr = worldcupData.teams_iso;
+        var isoNames = worldcupData.teams_iso;
+
+        for (var i in isoNames){
+            console.log(isoNames[i]);
+            d3.select("[id=cntr_"+isoNames[i]+"]").classed("team", true); 
+        }
         
-        d3.selectAll("[id^=cntr_]").classed("team", true); 
-        
-        d3.select("#map").select("#cntr_" + worldcupData['host_country_code']).classed('host', true);
+        d3.select("#cntr_" + worldcupData['host_country_code']).classed('host', true);
         
         d3.select("#points")
             .data([worldcupData.win_pos])
