@@ -1,4 +1,4 @@
-class BarChart {
+class BarChart{
 
     /**
      * Create a bar chart instance and pass the other views in.
@@ -10,6 +10,8 @@ class BarChart {
         this.worldMap = worldMap;
         this.infoPanel = infoPanel;
         this.allData = allData;
+        console.log(this.worldMap);
+        console.log(this.infoPanel);
     }
 
     /**
@@ -28,95 +30,93 @@ class BarChart {
 
         var svg = d3.select("#barChart");
 
-        var margin = { top: 20, right: 20, bottom: 40, left: 80 };
+        // SVG width = 500
+        // SVG height = 480
+
+        var margin = { top: 30, right: 30, bottom: 50, left: 60 };
+        
         var width = parseInt(svg.attr("width")) - margin.left - margin.right;
         var height = parseInt(svg.attr("height")) - margin.top - margin.bottom;
-        var max_data = d3.max(this.allData.map(function(d) {return d[selectedDimension]}));
 
-        console.log("max_data", max_data); 
-
-        var xScale = d3.scaleBand().rangeRound([0, width]);
-        var yScale = d3.scaleLinear().rangeRound([0, max_data]);
-
-        xScale.domain(this.allData.sort(function(a, b) {
-            return d3.ascending(a['year'], b['year'])
-            }).map(function (d) { return d['year']; }));
-
-        console.log(xScale.domain());
-
-        yScale.domain([0, max_data]);
+        console.log("width", width);
+        console.log("height", height);
+        
+        var xScale = d3.scaleBand()
+                        .range([0, width])
+                        .domain([1930, 1934, 1938, 1950, 1954, 1958, 1962, 1966, 1970, 
+                            1974, 1978, 1982, 1986, 1990, 1994, 1998, 2002, 2006, 2010, 2014]);
+        
+        var maxDataValue = d3.max(this.allData.map(d => d[selectedDimension]));
+        
+        var yScale = d3.scaleLinear()
+                        .rangeRound([height, 0])
+                        .domain([0, maxDataValue]);
 
         // Create colorScale
 
         var colorScale  = d3.scaleLinear()
-            .domain([0, max_data])
-            .interpolate(d3.interpolateBlues)
-            .range("lightblue", "blue");
+            .domain([0, maxDataValue])
+            .range(["lightblue", "darkblue"]);
 
         // Create the axes (hint: use #xAxis and #yAxis)
 
+
         svg.select("#xAxis")
-            .attr("transform", "translate(" + height + "," + width + ")")
+            .attr("transform", "translate(" + (margin.left) + "," + (height + margin.top) + ")")
             .call(d3.axisBottom(xScale))
-            .selectAll('text')
-            .attr("class", "axis axis--x")
+            .selectAll("text")
             .attr("transform", "rotate(-90)")
             .style("text-anchor", "end")
             .attr('dy', -1);
 
         svg.select("#yAxis")
-            .attr("transform", "translate(" + margin.left + ", 0)")
-            .attr("class", "axis axis--y")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
             .transition()
-            .ease(d3.easeSin)
-            .duration(300)
+            //.ease(d3.easeSin)
+            .duration(3000)
             .call(d3.axisLeft(yScale));
 
           
         // Create the bars (hint: use #bars)
 
-        var g = svg.select("#bars").attr("transform", "translate(" + margin.left + ", 0)"); 
+        var g = svg.select("#bars").attr("transform", "translate(" + margin.left + "," + ( margin.top ) + " )"); 
 
         var bars = g.selectAll(".bar").data(this.allData);
 
-        console.log("here we go");
 
         bars.transition()
-            .duration(1000)
-            .attr("height", d =>  max_data - yScale(d[selectedDimension]))
-            .attr("y", d => yScale(d[selectedDimension]))
-            .attr("fill", d => 'blue');
-            //.attr("fill", d => colorScale(d[selectedDimension]));
+            .duration(3000)
+            .attr("height", d => height - yScale(d[selectedDimension]))
+            .attr("y", d =>  yScale(d[selectedDimension]))
+            .attr("x", d => xScale(d['YEAR']) + xScale.bandwidth()/2)
+            .attr("fill", d => colorScale(d[selectedDimension]));
+            //.attr("onmousemove", 'function(d) { d3.select(this).attr("fill", "silver");}')
 
 
         bars.enter()
             .append("rect")
             .attr("class", "bar")
-            //.attr("fill", d => colorScale(d[selectedDimension]))
-            .attr("x", d => xScale(d['year']))
-            .attr("width", xScale.bandwidth())
-            .attr("height", d => max_data - yScale(d[selectedDimension]))
-            .attr("fill", d => 'blue')
-            .attr("y", d => yScale(d[selectedDimension]));
-
-
-        // ******* TODO: PART II *******
-
-        // Implement how the bars respond to click events
-        // Color the selected bar to indicate is has been selected.
-        // Make sure only the selected bar has this new color.
-
-        // Call the necessary update functions for when a user clicks on a bar.
-        // Note: think about what you want to update when a different bar is selected.
+            .attr("fill", d => colorScale(d[selectedDimension]))
+            .attr("x", d => xScale(d['year']) + xScale.bandwidth()/2 )
+            .attr("width", xScale.bandwidth()-2)
+            .attr("height", d => height - yScale(d[selectedDimension]))
+            .attr("y", d=> yScale(d[selectedDimension]))
+            // ******* TODO: PART II *******
+            // Implement how the bars respond to click events
+            // Color the selected bar to indicate is has been selected.
+           // Make sure only the selected bar has this new color.
+            .on("click", function(d, i) {
+                d3.selectAll(".bar").attr("fill", d => colorScale(d[selectedDimension]));
+                d3.select(this).attr("fill","red");
+                // Call the necessary update functions for when a user clicks on a bar.
+                // Note: think about what you want to update when a different bar is selected.
+                window.barChart.worldMap.updateMap(d);
+                window.barChart.infoPanel.updateInfo(d);
+            })
 
     }
 
-    /**
-     *  Check the drop-down box for the currently selected data type and update the bar chart accordingly.
-     *
-     *  There are 4 attributes that can be selected:
-     *  goals, matches, attendance and teams.
-     */
+
     chooseData(select) {
         // ******* TODO: PART I *******
         //Changed the selected data when a user selects a different

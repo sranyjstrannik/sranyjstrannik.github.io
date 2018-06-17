@@ -21,6 +21,10 @@ class Map {
         // the colors and markers for hosts/teams/winners, you can use
         // d3 selection and .classed to set these classes on and off here.
 
+        d3.select("#points").selectAll('circle').remove();
+        d3.select("map").selectAll('.team').classed('team', false);
+        d3.select("map").selectAll('.host').classed('host', false);
+
     }
 
     /**
@@ -49,6 +53,32 @@ class Map {
 
 
         // Add a marker for gold/silver medalists
+
+                var arr = worldcupData.teams_iso;
+        
+        d3.selectAll("[id^=cntr_]").classed("team", true); 
+        // for (var i = 0; i < arr.length; i++) {
+        //     this.map.select("#cntr_" + arr[i]).classed('team', true);
+        // }
+        
+        d3.select("map").select("#cntr_" + worldcupData['host_country_code']).classed('host', true);
+        
+        d3.select("#points")
+        .data([worldcupData.win_pos])
+        .append('circle')        
+        .attr("cx",  d => this.projection(d)[0])
+        .attr("cy", d =>  this.projection(d)[1])
+        .attr("r", "8px")
+        .classed("gold", true);
+
+        d3.select("#points")
+        .data([worldcupData.ru_pos])
+        .append('circle')
+        .attr("cx", d => this.projection(d)[0])
+        .attr("cy", d => this.projection(d)[1])
+        .attr("r", "8px")
+        .classed("silver", true);
+
     }
 
     /**
@@ -57,19 +87,25 @@ class Map {
      */
     drawMap(world) {
 
-        //(note that projection is a class member
-        // updateMap() will need it to add the winner/runner_up markers.)
+                var path = d3.geoPath().projection(this.projection);
+        
+        d3.select("map").selectAll("path")
+            .data(topojson.feature(world, world.objects.countries).features)
+            .enter()
+            .append("path")
+            .attr('id', d => 'cntr_' + d.id)
+            .classed("countries", true)
+            .attr("d", path);
 
-        // ******* TODO: PART IV *******
+        var graticule = d3.geoGraticule();
 
-        // Draw the background (country outlines; hint: use #map)
-        // Make sure and add gridlines to the map
-
-        // Hint: assign an id to each country path to make it easier to select afterwards
-        // we suggest you use the variable in the data element's .id field to set the id
-
-        // Make sure and give your paths the appropriate class (see the .css selectors at
-        // the top of the provided html file)
+        d3.select("map").append("path")
+            .datum(graticule)
+            .style("fill", "none")
+            .style("stroke", '#777')
+            .style("stroke-width", '.5px')
+            .style("stroke-opacity", 0.7)
+            .attr("d", path);
 
     }
 

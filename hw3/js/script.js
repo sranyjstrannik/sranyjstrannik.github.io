@@ -1,6 +1,6 @@
 
 // Load CSV file
-d3.csv("fifa-world-cup.csv", function (error, allData) {
+d3.csv("data/fifa-world-cup.csv", function (error, allData) {
     console.log(error);
     allData.forEach(function (d) {
         // Convert numeric values to 'numbers'
@@ -26,7 +26,6 @@ d3.csv("fifa-world-cup.csv", function (error, allData) {
     /* DATA LOADING */
     //Load in json data to make map
     d3.json("data/world.json", function (error, world) {
-        if (error) throw error;
         worldMap.drawMap(world);
     });
 
@@ -37,15 +36,3 @@ d3.csv("fifa-world-cup.csv", function (error, allData) {
     barChart.updateBarChart('attendance');
 });
 
-/**
- *  Check the drop-down box for the currently selected data type and update the bar chart accordingly.
- *
- *  There are 4 attributes that can be selected:
- *  goals, matches, attendance and teams.
- */
-function chooseData() {
-    // ******* TODO: PART I *******
-    // Changed the selected data when a user selects a different
-    // menu item from the drop down.
-
-}
