@@ -6,21 +6,21 @@ class Table {
     constructor(teamData, treeObject) {
 
         //Maintain reference to the tree Object; 
-        this.tree = null; 
+        this.tree = treeObject; 
 
         // Create list of all elements that will populate the table
         // Initially, the tableElements will be identical to the teamData
-        this.tableElements = null; // 
+        this.tableElements = teamData; // 
 
         ///** Store all match data for the 2014 Fifa cup */
-        this.teamData = null;
+        this.teamData = teamData;
 
         //Default values for the Table Headers
         this.tableHeaders = ["Delta Goals", "Result", "Wins", "Losses", "TotalGames"];
 
         /** To be used when sizing the svgs in the table cells.*/
         this.cell = {
-            "width": 70,
+            "width": 90,
             "height": 20,
             "buffer": 15
         };
@@ -58,9 +58,36 @@ class Table {
         // ******* TODO: PART II *******
 
         //Update Scale Domains
+        this.goalScale = d3.scaleLinear()
+            .domain([0, 18])
+            .range([this.cell.buffer, this.cell.width + this.cell.buffer]);
+
+        this.gameScale = d3.scaleLinear()
+            .domain([1, 7])
+            .range([this.cell.buffer, this.cell.width + this.cell.width]);
+
+        this.goalColorScale = d3.scaleLinear()
+            .domain([0, 6])
+            .range(['#ece2f0', '#016450']);
+
 
         // Create the x axes for the goalScale.
 
+        var goalAxis = d3.axisBottom()
+            .tickValues(d3.range(0, 20, 2))
+            .scale(this.goalScale);
+
+
+        d3.select("#goalHeader")
+            .append("svg")
+            .attr("height", this.cell.height)
+            .attr("width", this.cell.width + 2 * this.cell.buffer)
+            .append("g")
+            .attr("height", this.cell.height)
+            .attr("width", this.cell.width + 2 * this.cell.buffer)
+            //.attr("transform", "translate(" + -this.cell.buffer + "," + 0 + ")")
+            .call(goalAxis);
+            
         //add GoalAxis to header of col 1.
 
         // ******* TODO: PART V *******
@@ -79,8 +106,49 @@ class Table {
     updateTable() {
         // ******* TODO: PART III *******
         //Create table rows
+        var rows = d3.select("tbody")
+            .selectAll("tr")
+            .data(this.teamData)
+            .enter()
+            .append("tr");
+
+
+        var tableHeaders = this.tableHeaders;
+        var teamData = this.teamData;
+        var cell = this.cell;
+        var scales = [this.goalScale,this.goalScale, this.gameScale];
+        scales[1488] = this.goalColorScale;
+
+
+        var cells = rows.selectAll("td")
+            .data(function (row) {
+            return [row.key].concat(tableHeaders.map(function (columnHeader) {
+              return row.value[columnHeader];
+            }));
+          })
+          .enter()
+          .append('td');
+
+
+        cells.filter((d, i) => i<=2)
+            .text(function(d, i){
+            return  i!= 2 ? d : d.label;
+          });
+
+        cells.filter((d, i) => i>2)
+          .append("div")
+          .style("height", cell.height + "px")
+          .style("width", (d, i) => scales[i](d) + "px")
+          .style("background-color", (d, i) => scales[1488](d))
+          .style("color", "white")
+          .style("text-align","right")
+          .text(function(d, i){
+            return d;
+          });
 
         //Append th elements for the Team Names
+
+        //rows.append("td")
 
         //Append td elements for the remaining columns. 
         //Data for each cell is of the type: {'type':<'game' or 'aggregate'>, 'value':<[array of 1 or two elements]>}
