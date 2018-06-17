@@ -22,8 +22,8 @@ class Map {
         // d3 selection and .classed to set these classes on and off here.
 
         d3.select("#points").selectAll('circle').remove();
-        d3.select("map").selectAll('.team').classed('team', false);
-        d3.select("map").selectAll('.host').classed('host', false);
+        d3.select("#map").selectAll('.team').classed('team', false);
+        d3.select("#map").selectAll('.host').classed('host', false);
 
     }
 
@@ -54,30 +54,27 @@ class Map {
 
         // Add a marker for gold/silver medalists
 
-                var arr = worldcupData.teams_iso;
+        var arr = worldcupData.teams_iso;
         
         d3.selectAll("[id^=cntr_]").classed("team", true); 
-        // for (var i = 0; i < arr.length; i++) {
-        //     this.map.select("#cntr_" + arr[i]).classed('team', true);
-        // }
         
-        d3.select("map").select("#cntr_" + worldcupData['host_country_code']).classed('host', true);
+        d3.select("#map").select("#cntr_" + worldcupData['host_country_code']).classed('host', true);
         
         d3.select("#points")
-        .data([worldcupData.win_pos])
-        .append('circle')        
-        .attr("cx",  d => this.projection(d)[0])
-        .attr("cy", d =>  this.projection(d)[1])
-        .attr("r", "8px")
-        .classed("gold", true);
+            .data([worldcupData.win_pos])
+            .append('circle')        
+            .attr("cx",  d => this.projection(d)[0])
+            .attr("cy", d =>  this.projection(d)[1])
+            .attr("r", "8px")
+            .classed("gold", true);
 
         d3.select("#points")
-        .data([worldcupData.ru_pos])
-        .append('circle')
-        .attr("cx", d => this.projection(d)[0])
-        .attr("cy", d => this.projection(d)[1])
-        .attr("r", "8px")
-        .classed("silver", true);
+            .data([worldcupData.ru_pos])
+            .append('circle')
+            .attr("cx", d => this.projection(d)[0])
+            .attr("cy", d => this.projection(d)[1])
+            .attr("r", "8px")
+            .classed("silver", true);
 
     }
 
@@ -87,9 +84,9 @@ class Map {
      */
     drawMap(world) {
 
-                var path = d3.geoPath().projection(this.projection);
+        var path = d3.geoPath().projection(this.projection);
         
-        d3.select("map").selectAll("path")
+        d3.select("#map").selectAll("path")
             .data(topojson.feature(world, world.objects.countries).features)
             .enter()
             .append("path")
@@ -99,7 +96,7 @@ class Map {
 
         var graticule = d3.geoGraticule();
 
-        d3.select("map").append("path")
+        d3.select("#map").append("path")
             .datum(graticule)
             .style("fill", "none")
             .style("stroke", '#777')
