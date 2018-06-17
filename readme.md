@@ -5,4 +5,4 @@
   	* [barchart.html](https://sranyjstrannik.github.io/hw2/barchart.html)
 3. homework 3
 	* [hw3.html](https://sranyjstrannik.github.io/hw3/hw3.html)
-	* [hw3-part2.html](https://sranyjstrannik.github.io/hw3/part2/hw3-part2.html)
+	* [hw3-part2.html](https://sranyjstrannik.github.io/hw3part2/hw3-part2.html)
