@@ -32,3 +32,8 @@ caption{
 
 td:first-child { text-align: center; }
 td:nth-child(2) {text-align: center; }
+
+div div{
+	background-color: lightblue;
+	border: 2px solid white;
+}
