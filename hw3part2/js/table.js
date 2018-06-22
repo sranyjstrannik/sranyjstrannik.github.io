@@ -19,6 +19,8 @@ class Table {
         this.tableHeaders = ["Delta Goals", "Result", "Wins", "Losses", "TotalGames"];
 
         this.lastSortIndex = -1;
+        this.collapseIndex = -1;
+        this.lastCollapseIndex = -1;
 
 
         /** To be used when sizing the svgs in the table cells.*/
@@ -38,15 +40,13 @@ class Table {
 
         /** Setup the scales*/
         this.goalScale = d3.scaleLinear()
-            .domain([d3.min(this.tableElements.map(d => d.value[this.goalsMadeHeader])),
-                d3.max(this.tableElements.map(d => d.value[this.goalsMadeHeader]))])
-            .range([this.cell.buffer, this.cell.width]); 
+            .domain([1,  20])
+            .range([this.cell.buffer, this.cell.width + this.cell.buffer]); 
 
         /** Used for games/wins/losses*/
         this.gameScale =  d3.scaleLinear()
-            .domain([d3.min(this.tableElements.map(d => d.value["TotalGames"])),
-                d3.max(this.tableElements.map(d => d.value["TotalGames"]))])
-            .range([this.cell.buffer, this.cell.width + this.cell.buffer]); 
+            .domain([0, 7])
+            .range([this.cell.buffer, this.cell.width]); 
 
 
         /**Color scales*/
@@ -78,7 +78,7 @@ class Table {
         // Create the x axes for the goalScale.
 
         var xAxis = d3.axisTop()
-            .tickValues(d3.range(0, 19, 3))
+            .tickValues(d3.range(1, 20, 3))
             .scale(this.goalScale);
 
 
@@ -87,8 +87,8 @@ class Table {
             .attr("height", this.cell.height + this.cell.buffer)
             .attr("width", this.cell.width + this.cell.buffer)
             .append("g")
-            .attr("transform", "translate(" + 0 + ", " + (this.cell.height) + ")")
-            .attr("width", this.cell.width  + this.cell.buffer)
+            .attr("transform", "translate(" + (3) + ", " + (this.cell.height) + ")")
+            .attr("width", this.cell.width + this.cell.buffer)
             .attr("height", this.cell.height)
             .call(xAxis);
 
@@ -100,7 +100,6 @@ class Table {
             .data(this.tableElements)
             .enter()
             .append("tr")
-            //.style("line-height", "50px")
             .append("th");
 
         var x = this;
@@ -113,10 +112,6 @@ class Table {
         d3.select("thead")
             .select("th").on("click", (d, i) => x.updateTable(0));
 
-        d3.select("tbody")
-            .selectAll("th").on("click", function(d, i){
-                 x.updateTable(); x.collapseList(i);});
-            //.on("mouseover", function(d, i) x.tree.updateTree(i));
 
 
         // Clicking on headers should also trigger collapseList() and updateTable(). 
@@ -127,9 +122,7 @@ class Table {
             var header = this.tableHeaders[i];
 
             d3.selectAll("tbody tr")
-                .data(this.tableElements.map(function (d, i){
-                    return d.value[header];
-                }))
+                .data(d3.range(1, 39,1))
                 .append("td")
                 .enter();
 
@@ -147,21 +140,27 @@ class Table {
     updateTable(sortIndex = -1) {
 
         
+        // delete all the inserted
         d3.selectAll("tbody td")
             .selectAll("*").remove();
 
         
         var headers = this.tableHeaders;
 
+        //console.log("updateTable", this.tableElements.length);
+
+        var data = this.tableElements.slice();
+
+        // sort data if there is such a need
         if (sortIndex != -1){
 
         if (this.lastSortIndex == sortIndex){
             if (sortIndex == 0)
-                var data = this.tableElements.sort((x,y) => d3.ascending(x.key, y.key));
+                var data = data.sort((x,y) => d3.ascending(x.key, y.key));
             else if (sortIndex == 2)
-                var data = this.tableElements.sort(
+                var data = data.sort(
                 (x,y) => d3.ascending(x.value[headers[sortIndex - 1]].ranking, y.value[headers[sortIndex - 1]].ranking));
-            else var data = this.tableElements.sort(
+            else var data = data.sort(
                 (x,y) => d3.ascending(x.value[headers[sortIndex - 1]], y.value[headers[sortIndex - 1]]));
             
 
@@ -176,11 +175,11 @@ class Table {
          }
         } else {
             if (sortIndex == 0)
-                var data = this.tableElements.sort((x,y) => d3.descending(x.key, y.key));
+                var data = data.sort((x,y) => d3.descending(x.key, y.key));
             else if (sortIndex == 2)
-                var data = this.tableElements.sort(
+                var data = data.sort(
                 (x,y) => d3.descending(x.value[headers[sortIndex - 1]].ranking, y.value[headers[sortIndex - 1]].ranking));
-            else var data = this.tableElements.sort(
+            else var data = data.sort(
                 (x,y) => d3.descending(x.value[headers[sortIndex - 1]], y.value[headers[sortIndex - 1]]));
             if (sortIndex == 0){
                 var colName = d3.select("thead").select("th").html();    
@@ -205,45 +204,73 @@ class Table {
             };
 
             this.lastSortIndex = sortIndex;
-        }} else var data = this.tableElements;
+        }};
 
+
+        if (this.collapseIndex > -1)
+        {
+            var needToInsert = data[this.collapseIndex].value["games"];
+            for (var k in needToInsert)
+                data.splice(this.collapseIndex + 1, 0, needToInsert[k]);
+            //console.log(data);
+        }
+
+
+        // insert team names
         d3.selectAll("tbody th")
-            .data(data.map(d => d.key))
-            .html(d => d);
-
-        d3.selectAll("[class=Result]")
-            .data(data.map(d => d.value["Result"].label))
-            .html(d => d);
+            .data(data)
+            .html(d => d.key)
+            .classed("game", d => d.value["Losses"].length == 0)
+            .classed("aggregate", d => (d.value["Losses"].length != 0));
 
 
-        var x = d3.select("tbody")
-            .selectAll("[class='Delta Goals']")
-            .data(data.map(d => [d.value["Delta Goals"], d.value["Goals Made"], d.value["Goals Conceded"]]))
+
+        // Goals Conceded range -- 2-14
+        // Goals Made range -- 1-18
+        // Math.abs(Delta Goals) range -- 0 -- 14 
+
+        d3.selectAll("[class = 'Delta Goals']")
+            .data(data.map(d => [d.value["Delta Goals"], d.value["Goals Made"],
+             d.value["Goals Conceded"], d.value["Losses"]]))
             .append("svg")
             .attr("height", this.cell.height)
-            .attr("width", this.cell.width)
-            .append("g")
-            .attr("height", this.cell.height)
-            .attr("width", this.cell.width)
+            .attr("width", this.cell.width + this.cell.buffer)
+            .attr("fill", d => d[3].length == 0? "#f0f0f0" : "white")
             .append("rect")
+            .attr("x", d => d[1] < Math.abs(d[2]) ? this.goalScale(d[1]) : this.goalScale(Math.abs(d[2])))
+            .attr("y", 13)
+            .attr("width", d => this.goalScale(Math.abs(d[0])) - this.cell.buffer)
             .attr("height", 5)
-            .attr("width", d => this.goalScale(Math.abs(d[0])))
-            .attr("fill", d => this.aggregateColorScale(d[0]))
-            .attr("x", d => this.goalScale(Math.min(Math.abs(d[1]), Math.abs(d[2]))))
-            .attr("y", 10)
+            .attr("fill", d =>  d[0] > 0 ? '#034e7b' : "#cb181d" )
+            .classed("goalBar", true)
             .enter();
 
-        x.append("cirle")
-            .attr("x", d => this.goalScale(d[1]))
-            .attr("y", this.cell.buffer)
-            .attr("size", this.cell.buffer)
-            .attr("fill", d => this.aggregateColorScale(d[1]));
+        d3.selectAll("[class='Delta Goals']")
+            .data(data.map(d => [d.value["Delta Goals"], d.value["Goals Made"], d.value["Goals Conceded"]]))
+            .selectAll("svg")
+            .append("circle")
+            .attr("cx", d => this.goalScale(d[1]))
+            .attr("cy", this.cell.buffer)
+            .attr("fill", "#034e7b")
+            .classed("goalCircle", true)
+            .enter();
 
-        x.append("cirle")
-            .attr("x", d => this.goalScale(d[2]))
-            .attr("y", this.cell.buffer)
-            .attr("size", this.cell.buffer)
-            .attr("fill", d => this.aggregateColorScale(d[2]));
+
+        d3.selectAll("[class='Delta Goals']")
+            .data(data.map(d => [d.value["Delta Goals"], d.value["Goals Made"], d.value["Goals Conceded"]]))
+            .selectAll("svg")
+            .append("circle")
+            .attr("cx", d => this.goalScale(d[2]))
+            .attr("cy", this.cell.buffer)
+            .attr("fill", "#cb181d")
+            .classed("goalCircle", true)
+            .enter();
+
+
+          // insert text representations of results
+        d3.selectAll("[class=Result]")
+            .data(data.map(d => d))
+            .html(d => d.value["Losses"].length == 0 ? "" : d.value["Result"].label);
 
 
         d3.select("tbody")
@@ -257,7 +284,7 @@ class Table {
             .attr("width", this.cell.width)
             .append("rect")
             .attr("height", this.cell.height)
-            .attr("width", d => this.goalScale(d))
+            .attr("width", d => this.gameScale(d))
             .attr("fill", d => this.goalColorScale(d))
             .enter();
 
@@ -265,7 +292,7 @@ class Table {
             .selectAll("g")
             .append("text")
             .attr("height", this.cell.height)
-            .attr("width", d => this.goalScale(d))
+            .attr("width", d => this.gameScale(d))
             .attr("x", 0)
             .attr("y", this.cell.buffer)
             .attr("fill", "white")
@@ -282,7 +309,7 @@ class Table {
             .attr("width", this.cell.width)
             .append("rect")
             .attr("height", this.cell.height)
-            .attr("width", d => this.goalScale(d))
+            .attr("width", d => this.gameScale(d))
             .attr("fill", d => this.goalColorScale(d))
             .enter();
 
@@ -290,7 +317,7 @@ class Table {
             .selectAll("g")
             .append("text")
             .attr("height", this.cell.height)
-            .attr("width", d => this.goalScale(d))
+            .attr("width", d => this.gameScale(d))
             .attr("x", 0)
             .attr("y", this.cell.buffer)
             .attr("fill", "white")
@@ -307,7 +334,7 @@ class Table {
             .attr("width", this.cell.width)
             .append("rect")
             .attr("height", this.cell.height)
-            .attr("width", d => this.goalScale(d))
+            .attr("width", d => this.gameScale(d))
             .attr("fill", d => this.goalColorScale(d))
             .enter();
 
@@ -315,11 +342,21 @@ class Table {
             .selectAll("g")
             .append("text")
             .attr("height", this.cell.height)
-            .attr("width", d => this.goalScale(d))
+            .attr("width", d => this.gameScale(d))
             .attr("x", 0)
             .attr("y", this.cell.buffer)
             .attr("fill", "white")
             .text(d => d);
+
+        var x = this;
+
+        console.log("selection size", d3.select("tbody")
+            .selectAll("[class=aggregate]").size());
+
+        d3.select("tbody")
+            .selectAll("[class=aggregate]").on("click", function(d, i){
+                 x.collapseList(i);  x.updateTable();});
+
     }
 
     /**
@@ -338,8 +375,8 @@ class Table {
      *
      */
     collapseList(index = -1) {
-        console.log("collapseList", index);
-        
+        if (this.collapseIndex == index) this.collapseIndex = -1;
+        else this.collapseIndex = index;
         // ******* TODO: PART IV *******
 
     }

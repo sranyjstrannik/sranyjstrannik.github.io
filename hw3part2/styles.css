@@ -48,6 +48,12 @@ tbody tr .game {
     background-color: #f0f0f0;
 }
 
+
+td .game{
+    background-color: #f0f0f0;
+}
+
+
 /*tbody tr .game:hover {*/
     /*background-color: #dbdbdb;*/
 /*}*/
