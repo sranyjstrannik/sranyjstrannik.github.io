@@ -152,7 +152,7 @@ class Table {
         var data = this.tableElements.slice();
 
         // sort data if there is such a need
-        if (sortIndex != -1){
+        if (sortIndex != -1 && this.collapseIndex == -1){
 
         if (this.lastSortIndex == sortIndex){
             if (sortIndex == 0)
@@ -350,12 +350,13 @@ class Table {
 
         var x = this;
 
-        console.log("selection size", d3.select("tbody")
-            .selectAll("[class=aggregate]").size());
-
         d3.select("tbody")
             .selectAll("[class=aggregate]").on("click", function(d, i){
                  x.collapseList(i);  x.updateTable();});
+
+         d3.select("tbody")
+            .selectAll("[class=game]").on("click", function(d, i){
+                 });
 
     }
 
@@ -375,8 +376,11 @@ class Table {
      *
      */
     collapseList(index = -1) {
-        if (this.collapseIndex == index) this.collapseIndex = -1;
-        else this.collapseIndex = index;
+        if (index == this.collapseIndex){
+            this.collapseIndex = -1;
+            return;
+        };
+        this.collapseIndex = index;
         // ******* TODO: PART IV *******
 
     }
