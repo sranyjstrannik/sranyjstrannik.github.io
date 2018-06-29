@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>Homework 4 (part 1)</title>
+<link rel="stylesheet" href="styles.css"/>
+<body>
+
+<script src="http://d3js.org/d3.v3.min.js"></script>
+  
+  Plot type: <br>
+  <select id="by">
+        <option selected value="gdp">GDP</option>
+        <option value="population">Population</option>
+        <option value="life">Life expectacy</option>
+  </select>
+  <br>
+  Layout: <br>
+    <label><input type="radio" name="layout1" value="vertical" checked> Vertical equal spaces </label> <br>
+    <label><input type="radio" name="layout1" value="verticalLS"> Vertical with a linear scale </label> <br>
+    <hr>
+    <label><input type="radio" name="layout1" value="GDP" > (GDP, Population) </label> <br>
+    <label><input type="radio" name="layout1" value="ll" > (longtitude, latitude) </label> <br>
+    <label><input type="radio" name="layout1" value="circularP" > Circular(by population) </label> <br>
+    <label><input type="radio" name="layout1" value="circularG" > Circular(by GDP) </label> <br>
+  <label><input type="radio" name="layout1" value="grouped" > Grouped by continent </label> <br>
+  <label><input type="radio" name="layout1" value="grouped2" > Grouped by continent (x2) </label> <br>
+<svg>
+</svg>
+</body>
+<script type="application/javascript" src="js/script.js"></script>
+</html>

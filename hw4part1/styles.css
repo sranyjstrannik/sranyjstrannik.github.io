@@ -1,0 +1,23 @@
+  .link {
+    stroke: gray;
+    stroke-width: .8px;
+  }
+
+  .node {
+    fill: white;
+    stroke: #000;
+    stroke-width: .9px;
+  }
+
+  .node:hover {
+    fill: black;
+  }
+
+  div {
+  	border: 2px solid gray;
+  	margin: 10px;
+  }
+
+  #vertical{
+  	disabled: true;
+  }
